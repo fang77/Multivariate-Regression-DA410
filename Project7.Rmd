@@ -1,0 +1,125 @@
+---
+title: "Project 7"
+output: html_notebook
+---
+
+## JONATHAN FENG
+
+**
+13.8) Use the ramus bone data of Table 3.7
+**
+
+```{r}
+bone <- read.csv("C:\\Users\\Taterthot\\Desktop\\da 410\\a8\\bone.csv", fileEncoding = 'UTF-8-BOM')
+bone
+```
+
+**
+(a) Extract loadings by the principal component method and do a varimax rotation. Use two Factors.
+**
+
+# FINDING CORRELATION MATRIX C
+
+```{r}
+bone.cor <- cor(bone[,1:4])
+bone.cor
+```
+
+# FINDING EIGENVALUE D AND EIGENVECTOR C
+
+```{r}
+eigen <- eigen(bone.cor)
+eigen
+```
+
+```{r}
+c <- eigen$vectors[,1:2]
+c
+
+d <- diag(eigen$values[1:2])
+d
+```
+
+## LOADINGS LAMBDA 1 AND 2
+
+```{r}
+a <- c %*% sqrt(d)
+a <- -(a)
+round(a, 3)
+```
+
+## COMMUNALITIES
+
+```{r}
+com <- (a[,1]^2) + (a[,2]^2)
+com <- round(com, 3)
+com
+```
+
+## SPECIFIC VARIANCES
+
+```{r}
+var <- round((1 - (com)), 3)
+var
+```
+
+## TOTAL VARIANCE ACCOUNTED FOR
+
+```{r}
+total.var <- eigen$values[1:2]
+total.var
+```
+
+## PROPORTION OF TOTAL VARIANCE
+
+```{r}
+x <- rep(NA, 2)
+for (i in 1:2) {
+  x[i] <-
+    eigen$values[i] / (eigen$values[1] + eigen$values[2] + eigen$values[3] + eigen$values[4])
+}
+x <- round(x, digits = 3)
+x 
+```
+
+## VARIMAX LOADINGS
+
+```{r}
+varimax <- varimax(a)
+varimax
+
+varimax <- c(varimax$loadings)
+varimax <- data.frame(varimax[1:4], varimax[5:8])
+```
+
+## FINAL RESULTS IN DATAFRAME 
+
+```{r}
+final <- data.frame(a,varimax, com, var)
+final <- rbind(final, total.var, x)
+final[5,5] <- sum(com)
+final[6,5] <- sum(x)
+final[5:6,6] <- NA
+final[5:6,6] <- NA
+final[5,3] <- 2.019
+final[5,4] <- 1.932
+final[6,3] <- 0.505
+final[6,4] <- 0.483
+
+
+names(final)[names(final) == "X1"] <- "F1"
+names(final)[names(final) == "X2"] <- "F2"
+names(final)[names(final) == "com"] <- "Communalities"
+names(final)[names(final) == "var"] <- "Specific Variances"
+names(final)[names(final) == "varimax.1.4."] <- "Varimax F1"
+names(final)[names(final) == "varimax.5.8."] <- "Varimax F2"
+
+final <- cbind(Row.Names = c("8 years", "8.5 years", "9 years", "9.5 years", "Variance", "Proportion"), final)
+names(final)[names(final) == "Row.Names"] <- "Variables"
+
+final["F1"] <- round(final["F1"],3)
+final["F2"] <- round(final["F2"],3)
+final["Varimax F1"] <- round(final["Varimax F1"],3)
+final["Varimax F2"] <- round(final["Varimax F2"],3)
+final
+```

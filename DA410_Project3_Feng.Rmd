@@ -1,0 +1,83 @@
+---
+title: "Project 3"
+output: html_notebook
+---
+
+# PART 1
+
+**
+The data shown in the next page were collected by Spicer et al. (1987) in an
+investigation of sudden infant death syndrome (SIDS). The two groups here consist of 16
+SIDS victims and 49 controls. The Factor68 variable arises from spectral analysis of 24
+hour recordings of electrocardiograms and respiratory movements made on each child.
+All the infants have a gestational age of 37 weeks or more and were regarded as full
+term. Enter the data in a Note Pad and save it as SIDS.txt
+**
+
+```{r}
+library(MASS)
+file <- "C:\\Users\\Taterthot\\Desktop\\da 410\\a4\\babydeath.txt"
+sids <- read.table(file, header = TRUE, sep = "", dec = ".")
+sids
+
+```
+
+# PART 2
+
+**
+Use R to construct the discriminant function based on all four variables and use it to classify a baby with HR = 100, BW = 3000, Factor68 = 0.3, Gesage = 40. 
+
+Make sure you include clear command lines and relevant output/results with hypotheses, test result(s) and conclusion(s)/interpretation(s).
+**
+
+```{r}
+sids.lda <- lda(Group~ ., data = sids,  prior=c(0.5,0.5))
+sids.lda
+```
+
+```{r}
+classobs <- rbind(c(100, 3000, 0.30, 40))
+dimnames(classobs) <- list(NULL,c('HR','BW', 'Factor68', 'Gesage'))
+classobs <- data.frame(classobs)
+classobs
+```
+
+## PREDICT GROUP
+
+```{r}
+predict(sids.lda,newdata=classobs)$class
+```
+
+With the prediction we can say that a baby with HR = 100, BW=3000, Factor68=0.3, and Gesage=40 would classify with the sids of group 1.
+
+## POSTERIOR PROBABILITIES
+
+```{r}
+predict(sids.lda,newdata=classobs)$posterior
+```
+
+With the likley-hood of prior probability and new evidence we can suggest that with the current baby prediction, 65.71% of sids babies will fall into group 1, while the other 34.29% would fall into group 2. We have further analysis of misclassification and cross-validation rates below.
+
+## MISCLASSIFICATION RATE
+
+```{r}
+group<-predict(sids.lda, sids, method='plug-in')$class
+table(group, sids$Group)
+```
+
+Plug-in missclassicifaction: (3+8) / (41+3+8+13) = 11/65 = 0.169.
+
+## CROSS VALIDATION
+
+```{r}
+correct<-rep(0,times=nrow(sids) )
+for (j in 1:nrow(sids) ) {
+mydis<-lda(grouping=sids$Group[-j], x=sids[-j,2:5], prior=c(0.5,0.5))
+mypred<-predict(mydis,newdata=sids[j,2:5])$class
+correct[j] <- (mypred==sids$Group[j])
+}
+cv.misclass <- 1-mean(correct)
+cv.misclass
+```
+
+Cross-validation misclassification rate for LDA is 0.20.

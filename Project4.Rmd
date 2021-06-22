@@ -1,0 +1,137 @@
+---
+title: "Project 4"
+output: html_notebook
+---
+
+## JONATHAN FENG
+
+# Get Your Data 
+
+```{r}
+data(iris)
+iris
+
+names(iris) <- c("Sepal.Length", "Sepal.Width", "Petal.Length",
+"Petal.Width", "Species")
+```
+
+# Initial Overview of The Data Set
+
+```{r}
+library(ggvis)
+iris %>% ggvis(~Sepal.Length, ~Sepal.Width, fill = ~Species) %>%
+layer_points()
+```
+
+# QUESTION 1
+
+**
+What is the output? Based on the plot, which specie(s) has the highest correlation between the sepal length and the sepal width? 
+**
+
+The output is above. Based on the plot Setosa has the highest correlation between the sepal length and width because the spread is closer together and it is distributed as a fairly linear trend. Setosa has the correlation on calculation as well shown below.
+
+```{r}
+vir <- subset(iris, iris$Species == "virginica")
+s <- subset(iris, iris$Species == "setosa")
+color <- subset(iris, iris$Species == "versicolor")
+
+cor(s$Sepal.Length, s$Sepal.Width)
+cor(color$Sepal.Length, color$Sepal.Width)
+cor(vir$Sepal.Length, vir$Sepal.Width)
+```
+
+**
+Now, let’s try the scatter plot that maps the petal length and the petal:
+**
+
+```{r}
+iris %>% ggvis(~Petal.Length, ~Petal.Width, fill = ~Species) %>%
+layer_points()
+```
+
+# QUESTION 2
+
+**
+What is the output? Based on the plot, which specie(s) has the highest correlation between the petal length and the petal width? Is this result consistent with Question 1? Why or why not?
+**
+
+The output is above. Based on the plot versicolor seems to have the highest correlation between the petal length and the petal width, and it seems to have a linear relationship. It is not consistent with the results of question one because you can't attribute different parts of the flower with each other, difference species are expected to have different lengths and widths for petals and sepals. We will run the calculations below.It shows true that versicolor as the highest correlation on petal length and width.
+
+```{r}
+vir <- subset(iris, iris$Species == "virginica")
+s <- subset(iris, iris$Species == "setosa")
+color <- subset(iris, iris$Species == "versicolor")
+
+cor(s$Petal.Length, s$Petal.Width)
+cor(color$Petal.Length, color$Petal.Width)
+cor(vir$Petal.Length, vir$Petal.Width)
+```
+
+## Setting training and labels
+
+```{r}
+set.seed(1234)
+
+ind <- sample(2, nrow(iris), replace=TRUE, prob=c(0.67, 0.33))
+iris.training <- iris[ind==1, 1:4]
+iris.test <- iris[ind==2, 1:4]
+
+iris.trainLabels <- iris[ind==1, 5]
+iris.testLabels <- iris[ind==2, 5]
+```
+
+
+## Training KNN and Prediction.
+
+# QUESTION 3
+
+**
+What is the output?
+**
+
+Output is below.
+
+```{r}
+library('class')
+
+iris_pred <- knn(train = iris.training, test = iris.test, cl =
+iris.trainLabels, k=3)
+
+iris_pred
+```
+
+# QUESTION 4
+
+**
+What is the command that may produce above output?
+**
+
+Command should be data.frame to see all. ALthough I included an extra table of the counts and errors.
+
+```{r}
+Predicted_Species <- iris_pred
+Observed_Species <- iris.testLabels
+
+tab <- data.frame(Predicted_Species, Observed_Species)
+print.data.frame(tab)
+```
+```{r}
+table(Predicted_Species, Observed_Species)
+```
+
+# QUESTION 5
+
+**
+What is the output?
+**
+
+The output is listed below.
+
+Correct Classification = (12 + 12 + 15) / 40 = 39/40
+Error Rate = 1 - (39/40) = 1/40 = 0.025
+
+```{r}
+library(gmodels)
+CrossTable(x = iris.testLabels, y = iris_pred, prop.chisq=FALSE)
+```

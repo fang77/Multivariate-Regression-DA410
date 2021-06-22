@@ -1,0 +1,103 @@
+---
+title: "Project 6"
+output: html_notebook
+---
+
+## JONATHAN FENG
+
+**
+Carry out a principal component analysis separately for the two species in the beetle data of Table 5.5. Compare the results for the two groups. Use S.
+[BEETLE DATA]
+**
+
+## DATA IMPORTS
+
+```{r}
+beet <- read.csv("C:\\Users\\Taterthot\\Desktop\\da 410\\a7\\beetles.csv", fileEncoding = 'UTF-8-BOM')
+beet
+```
+
+## BEETLES CLEAN DATA
+
+```{r}
+beet.o <- subset(beet, Species == "Haltica oleracea")
+beet.c <- subset(beet, Species == "Haltica carduorum")
+head(beet.o)
+head(beet.c)
+```
+
+## S MATRICES
+
+```{r}
+s1 <- var(beet.o[2:5])
+s2 <- var(beet.c[2:5])
+s1
+s2
+```
+
+## EIGEN VECTORS FOR BOTH GROUPS
+
+```{r}
+e1 <- eigen(s1)
+e2 <- eigen(s2)
+e1
+e2
+```
+
+## VARIANCE EXPLAINED BY COMPONENT
+
+### E1
+
+```{r}
+var <- rep(NA, 4)
+for (i in 1:4) {
+  var[i] <- e1$values[i] / (e1$values[1] + e1$values[2] + e1$values[3] + e1$values[4])
+}
+var
+```
+
+Variance of the Haltica Oleracea beetles is show as the first component explaining around 66-67% of the variation with our second component explaining around 20%.The rest of the components and variation percentages are shown above.
+
+### E2
+
+```{r}
+var2 <- rep(NA, 4)
+for (i in 1:4) {
+  var2[i] <-
+    e2$values[i] / (e2$values[1] + e2$values[2] + e2$values[3] + e2$values[4])
+}
+var2
+```
+
+Variance of the Haltica Carduorum beetles is show as the first component explaining around 66% of the variation with our second component explaining around 17%. The rest of the components and variation percentages are shown above.
+
+## PCA ANALYSIS
+
+### oleracea
+
+```{r}
+summary(princomp(x = beet.o[2:5]))
+```
+
+### carduorum
+
+```{r}
+summary(princomp(x = beet.c[2:5]))
+```
+
+Of the two PCAs we ran on the two different species of beetles, the oleracea variant can account for more of the variation within the first two of the components than the other species. With the combination of our first two components we can say that for oleracea that it explains around 87% of the data versus our other one having around 3% less.
+
+## DECIDING WHICH PRINCIPLE COMPONENTS TO KEEP
+
+```{r}
+e1$values > mean(e1$values)
+```
+
+```{r}
+e2$values > mean(e2$values)
+```
+
+Based on the mean values we can compare these values presented to tell us which one to keep based on this basic boolean logic of keeping it above the mean for the variance.
+
+Due to the results and putting it into the boolean, we can only keep the first principle component of each species.
+

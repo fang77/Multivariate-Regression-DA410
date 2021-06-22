@@ -1,0 +1,35 @@
+---
+title: "Project 8"
+output: html_notebook
+---
+
+## JONATHAN FENG
+
+**
+Use the probe word data of Table 3.6. Conduct a confirmatory factor analysis of the covariance matrix forthe five variables. Use maximum likelihood to determine if the five word probes can be adequately modeled using a single latent factor. In formulating the model, identifiability can be ensured by letting y1 = f1 +e1, yi = lif1 +ei(i=2,3,4,5).
+**
+
+
+**
+(a) Assess goodness of fit with the criteria discussed in Section 14.3.3.
+**
+
+```{r}
+word <- read.csv("C:\\Users\\Taterthot\\Desktop\\da 410\\a9\\words.csv", fileEncoding = 'UTF-8-BOM')
+word
+```
+
+
+```{r}
+library(lavaan)
+
+lm <- 'f =~  NA*y1 + y2 + y3 + y4 + y5
+       f ~~ 1*f
+'
+
+cfa_word <- cfa(lm, data=word, estimator = "ML")
+
+summary(cfa_word, fit.measures=TRUE)
+```
+
+The chi squared statistic being 7.239 with a degrees of freedom of 5, based on 11 unique elements in S in our model. Thus, the p value associated with the hypothesis is 0.203, and we determine that we have insufficient evidence to declare lack of fit. The addition diagnostic metrics yield a mixed verdict about the goodness of fit for the proper model. Bentler's CFI is 0.911 less than the recommended cutoff of 0.95, SRMS value being 0.071 is less than but close to the recommended upper cutoff of 0.080, while the RMSEA is 0.202 being less than the cut off of 0.06. All in all the model still has a good fit.

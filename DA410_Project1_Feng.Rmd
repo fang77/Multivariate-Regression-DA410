@@ -1,0 +1,116 @@
+---
+title: "Project 1"
+output: html_notebook
+---
+## JONATHAN FENG
+
+# PART 1
+
+### DATA IN
+
+```{r}
+file <- "C:\\Users\\Taterthot\\Desktop\\da 410\\project1\\airpoll.txt"
+airpol.full <- read.table(file, header = TRUE, sep = "", dec = ".")
+
+airpol.full
+
+```
+
+### DATA TO AIRPOL
+
+```{r}
+city.names <-as.character(airpol.full[1:16,1])
+airpol.data.sub <-airpol.full[1:16,2:8]
+
+city.names
+```
+
+# PART 2
+
+## A
+
+### SAMPLE COVARIANCE MATRIX
+
+```{r}
+airpol.cov <- round(var(airpol.data.sub),digits=2)
+airpol.cov
+```
+
+### SAMPLE CORRELATION MATRIX
+
+```{r}
+airpol.cor <- round(cor(airpol.data.sub),digits=2)
+airpol.cor
+```
+
+### RELATIONSHIP [STRENGTH X DIRECTION]
+
+```{r}
+D.minus.12 <- diag( 1/sqrt(diag(airpol.cov) ) )
+my.R <- D.minus.12 %*% airpol.cov %*% D.minus.12
+my.R
+```
+
+I would describe [5,6] only having a strong correlation in terms of pairs, and those variables would be NOX and SO2.The direction is strong and the direction is positive. The rest of the variables either have mostly negative correlation and weak strength, and a few having positive correlation and weak strength. NOX and SO2 was the only notable one having a correlation above 0.80.
+
+## B
+
+### DISTANCE MATRIX
+
+```{r}
+dis <- dist(airpol.data.sub)
+
+dist2full<-function(ds){
+n<-attr(ds,"Size")
+ full<-matrix(0,n,n)
+full[lower.tri(full)]<-ds
+full+t(full)
+}
+
+std <- sapply(airpol.data.sub, sd)
+airpol.std <- sweep(airpol.data.sub,2,std,FUN="/")
+
+dis <- dist(airpol.std)
+dis.matrix<-dist2full(dis)
+round(dis.matrix,digits=2)
+
+```
+
+```{r}
+city.names
+```
+
+Let me say that any distance that is less than 1.5 would be considered most similar and any distance above 6 would be considered most different.
+
+Thus we get similar: [10, 1], [14, 1], [15, 1] and those being the cities of [Canton, OH | Akron, OH], [Cleveland, Akron], [Colombia, Akron].
+
+For the most different: [5, 16], [11, 12], [12, 10], [16, 12]. And to those respectively [Baltimore, Dallas], [Chatag, Chicago], [Chicago, Canton], and [Dallas, Chicago].
+
+## C
+
+### NORMALITY CHECK CHI-SQUARED PLOT
+
+```{r}
+
+chisplot <- function(x) {
+if (!is.matrix(x)) stop("x is not a matrix")
+
+ n <- nrow(x)
+ p <- ncol(x)
+ xbar <- apply(x, 2, mean)
+ S <- var(x)
+ S <- solve(S)
+ index <- (1:n)/(n+1)
+ xcent <- t(t(x) - xbar)
+ di <- apply(xcent, 1, function(x,S) x %*% S %*% x,S)
+
+ quant <- qchisq(index,p)
+ plot(quant, sort(di), ylab = "Ordered distances",
+ xlab = "Chi-square quantile", lwd=2,pch=1)
+}
+
+chisplot(as.matrix(airpol.data.sub))
+
+```
+
+Since we have the chi-square quantiles being displayed on the horizontal, we are checking if there are some bends or uneven parts to the data, straight line meaning that it is normally distributed. For the most part besides the second quantile and maybe the 14th, we can say that it follows a pretty straight line with little to no deviation meaning the ordered distances are normal, thus we can say the data used is approximately normal and comes from a multivariate normal distribution.
